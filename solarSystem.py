@@ -121,19 +121,43 @@ class Earth:
         global_theta_max = self.global_theta_max
         global_phi_max = self.global_phi_max
 
-        k = global_angle_degree_step * _time // (2 *(global_psi_max + global_phi_max + global_theta_max))
+        k = int(global_angle_degree_step * _time // (global_psi_max + global_phi_max + global_theta_max))
+        _time -= k * (global_psi_max + global_phi_max + global_theta_max) / global_angle_degree_step
+        _time = int(_time)
+
         if k > 0:
-            _time -= k * 2 * (global_psi_max + global_phi_max + global_theta_max) / global_angle_degree_step
-            global_angle_degree_step *= (-1)**k
-            global_phi_max *= (-1)**k
-            global_theta_max *= (-1)**k
-            global_psi_max *= (-1)**k
+            print(k)
+            k = k & 4
+            if k == 0:
+                global_angle_degree_step *= (-1)
+                global_psi = self.global_psi_max
+                global_theta = self.global_theta_max
+                global_phi = self.global_phi_max
+                global_phi_max = 0
+                global_theta_max = 0
+                global_psi_max = 0
+            elif k == 1:
+                global_angle_degree_step *= (-1)
+                global_phi_max *= -1
+                global_theta_max *= -1
+                global_psi_max *= -1
+            elif k == 2:
+                global_psi = self.global_psi * -1
+                global_theta = self.global_theta * -1
+                global_phi = self.global_phi * -1
+                global_phi_max = 0
+                global_theta_max = 0
+                global_psi_max = 0
+
+
+
+
+
 
 
 
 
         print(f'time:{_time} k:{k}')
-        _time = int(_time)
         for i in range(0, _time):
             if abs(global_psi) < abs(global_psi_max):
                 global_psi += global_angle_degree_step
@@ -141,14 +165,7 @@ class Earth:
                 global_theta += global_angle_degree_step
             elif abs(global_phi) < abs(global_phi_max):
                 global_phi += global_angle_degree_step
-            else:
-                global_psi_max *= -1
-                global_theta_max *= -1
-                global_psi_max *= -1
-                global_angle_degree_step *= -1
-                global_psi += global_angle_degree_step
-                global_theta += global_angle_degree_step
-                global_phi += global_angle_degree_step
+
 
 
         _psi_rad = math.radians(global_psi)
