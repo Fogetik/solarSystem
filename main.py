@@ -12,7 +12,7 @@ a = 0
 
 def update():
     global wid, sun, global_time
-    global_time += 0.31
+    global_time += 1
     sun.animate(global_time)
 
 class Orbit:

@@ -39,14 +39,7 @@ class sun:
         self.coor_z = 0
         self.earth_planet = Earth()
 
-        self.global_phi = 0
-        self.global_psi = 0
-        self.global_theta = 0
 
-        self.global_phi_max = 30
-        self.global_psi_max = 50
-        self.global_theta_max = 70
-        self.global_angle_degree_step = 1
 
 
     def draw(self, wid_ptr: gl.GLViewWidget):
@@ -65,35 +58,31 @@ class sun:
         self.earth_planet.draw(wid_ptr)
 
 
-    def animate(self, coor: float):
+    def animate(self, time: int):
         # self.m1.translate(coor, coor, coor)
         self.m1.rotate(-1, 0, 1, 1)
-
-        is_changed = True
-        if self.global_psi < self.global_psi_max:
-            self.global_psi += self.global_angle_degree_step
-        elif self.global_theta < self.global_theta_max:
-            self.global_theta += self.global_angle_degree_step
-        elif self.global_phi < self.global_phi_max:
-            self.global_phi += self.global_angle_degree_step
-        else:
-            is_changed = True
-
-        if is_changed:
-            self.earth_planet.animate(_psi_rad=math.radians(self.global_psi)
-                       , _theta_rad=math.radians(self.global_theta)
-                       , _phi_rad=math.radians(self.global_phi))
-
+        self.earth_planet.animate(time)
 
 
 class Earth:
     def __init__(self):
-        self.angle = 0
+        self.angle_degree_step = 1
         self.radius = 2
+
         self.child = []
+
         self.coor_x = 0
         self.coor_y = 10
         self.coor_z = 0
+
+        self.global_phi = 0
+        self.global_psi = 0
+        self.global_theta = 0
+
+        self.global_psi_max = 30
+        self.global_theta_max = 30
+        self.global_phi_max = 30
+        self.global_angle_degree_step = 0.2
 
     def rotate_x(self, angle: float):
         coor_y_cpy = self.coor_y
@@ -116,15 +105,60 @@ class Earth:
         self.md.setVertexes(self._pts)
         wid_ptr.addItem(self.m1)
 
-    def animate(self, _psi_rad
-                       , _theta_rad
-                       , _phi_rad):
+    def animate(self, _time):
+        # _psi_rad
+        #         , _theta_rad
+        #         , _phi_rad)
         # print(f'_psi_rad:{_psi_rad}, _theta_rad:{_theta_rad}, _phi_rad:{_phi_rad}')
 
-        # rot_mat = Formulas.get_3d_rot_mat(_psi_rad=_psi_rad, _theta_rad=_theta_rad, _phi_rad=_phi_rad)
-        # pts = np.dot(self._pts, rot_mat)
-        self.angle += 1
-        pts = np.dot(self._pts, Formulas.get_rot_mat('z', math.radians(self.angle)))
+        _angle = self.angle_degree_step * _time
+        global_psi = 0
+        global_theta = 0
+        global_phi = 0
+
+        global_angle_degree_step = self.global_angle_degree_step
+        global_psi_max = self.global_psi_max
+        global_theta_max = self.global_theta_max
+        global_phi_max = self.global_phi_max
+
+        k = global_angle_degree_step * _time // (2 *(global_psi_max + global_phi_max + global_theta_max))
+        if k > 0:
+            _time -= k * 2 * (global_psi_max + global_phi_max + global_theta_max) / global_angle_degree_step
+            global_angle_degree_step *= (-1)**k
+            global_phi_max *= (-1)**k
+            global_theta_max *= (-1)**k
+            global_psi_max *= (-1)**k
+
+
+
+
+        print(f'time:{_time} k:{k}')
+        _time = int(_time)
+        for i in range(0, _time):
+            if abs(global_psi) < abs(global_psi_max):
+                global_psi += global_angle_degree_step
+            elif abs(global_theta) < abs(global_theta_max):
+                global_theta += global_angle_degree_step
+            elif abs(global_phi) < abs(global_phi_max):
+                global_phi += global_angle_degree_step
+            else:
+                global_psi_max *= -1
+                global_theta_max *= -1
+                global_psi_max *= -1
+                global_angle_degree_step *= -1
+                global_psi += global_angle_degree_step
+                global_theta += global_angle_degree_step
+                global_phi += global_angle_degree_step
+
+
+        _psi_rad = math.radians(global_psi)
+        _theta_rad = math.radians(global_theta)
+        _phi_rad = math.radians(global_phi)
+        print(f'psi:{global_psi}, theta:{global_theta}, phi:{global_phi}')
+
+        pts = np.dot(self._pts, Formulas.get_rot_mat('z', math.radians(_angle)))
+        rot_mat = Formulas.get_3d_rot_mat(_psi_rad=_psi_rad, _theta_rad=_theta_rad, _phi_rad=_phi_rad)
+        pts = np.dot(pts, rot_mat)
         self.md.setVertexes(pts)
         self.m1.setMeshData(meshdata=self.md)
 
