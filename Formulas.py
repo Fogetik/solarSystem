@@ -1,6 +1,7 @@
 import numpy as np
 import math
 
+
 class Formulas:
     @staticmethod
     def get_rot_mat(_axis, _angle_rad):
@@ -22,9 +23,6 @@ class Formulas:
 
     @staticmethod
     def get_3d_rot_mat(_psi_rad: float = 0, _phi_rad: float = 0, _theta_rad: float = 0) -> np.ndarray:
-        """
-            Описание функции
-        """
         rot_z_1 = Formulas.get_rot_mat('z', _psi_rad)
         rot_x = Formulas.get_rot_mat('x', _theta_rad)
         rot_z_2 = Formulas.get_rot_mat('z', _phi_rad)
@@ -68,32 +66,32 @@ class Formulas:
         x = \
             - _orbit_a * math.sqrt(1 - _orbit_e ** 2) * math.sin(_t) \
             * (
-                    math.cos(_psi) * math.cos(_theta) * math.sin(_phi) \
+                    math.cos(_psi) * math.cos(_theta) * math.sin(_phi)
                     + math.cos(_phi) * math.sin(_psi)
             ) \
             + _orbit_a * (math.cos(_t) - _orbit_e) \
             * (
-                    -    math.cos(_theta) * math.sin(_phi) * math.sin(_psi) \
+                    - math.cos(_theta) * math.sin(_phi) * math.sin(_psi)
                     + math.cos(_phi) * math.cos(_psi)
             )
 
         y = \
             _orbit_a * math.sqrt(1 - _orbit_e ** 2) * math.sin(_t) \
             * (
-                    math.cos(_phi) * math.cos(_psi) * math.cos(_theta) \
+                    math.cos(_phi) * math.cos(_psi) * math.cos(_theta)
                     - math.sin(_phi) * math.sin(_psi)
             ) \
             + _orbit_a * (math.cos(_t) - _orbit_e) \
             * (
-                    math.cos(_phi) * math.cos(_theta) * math.sin(_psi) \
+                    math.cos(_phi) * math.cos(_theta) * math.sin(_psi)
                     + math.cos(_psi) * math.sin(_phi)
             )
 
         z = \
             _orbit_a * math.sin(_theta) \
-            * ( \
-                        math.sqrt(1 - _orbit_e ** 2) * math.cos(_psi) * math.sin(_t) \
-                        + (math.cos(_t) - _orbit_e) * math.sin(_psi) \
+            * (
+                        math.sqrt(1 - _orbit_e ** 2) * math.cos(_psi) * math.sin(_t)
+                        + (math.cos(_t) - _orbit_e) * math.sin(_psi)
                 )
 
         return np.array([[x, y, z]])
